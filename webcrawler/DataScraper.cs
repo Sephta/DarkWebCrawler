@@ -9,9 +9,9 @@ using System.Net.Http;
 using System.Linq;
 
 // Abot2
-using Abot2.Core;      // Core components <change this comment later this is a bad description>
-using Abot2.Crawler;   // Namespace where Crawler objects are defined
-using Abot2.Poco;      //
+using Abot2.Core;
+using Abot2.Crawler;
+using Abot2.Poco;
 
 // AbotX2
 using AbotX2.Core;
@@ -20,18 +20,13 @@ using AbotX2.Poco;     //
 using AbotX2.Parallel;
 
 // Logger
-using Serilog;         // Serilog provides diagnostic logging to files
+using Serilog;
 
 //BSON for mongo
 using MongoDB.Bson;
-//JSON Doc Formats
 
 //htmlAgilityParser
 using HtmlAgilityPack;
-
-//JSON 
-// using System.Text.Json;
-// using System.Text.Json.Serialization;
 
 // ScrapeAndCrawl
 using ScrapeAndCrawl.Extensions;
@@ -52,12 +47,6 @@ namespace ScrapeAndCrawl
         public static List<BsonDocument> dataDocuments = new List<BsonDocument>();
         public static List<string> allParsedText = new List<string>(); 
         public static String siteTitle = "";
-        /* ========== Private Members ======== */
-
-
-        /* ======= Class Constructors ======== */
-        // ? public DataScraper() {}
-        // ? public DataCrawler(CrawlConfigurationX configX) {}
 
 #region Public Class Methods
         /* ================================= Class Methods {Public} ============================ */
@@ -119,12 +108,6 @@ namespace ScrapeAndCrawl
             // this returns a list of parsed out text content from the raw html
             var parsedText = ParseRawHTML(rawPageText);
 
-            // Log.Logger.Debug("Parsed Text Content:");
-            // foreach (var item in parsedText)
-            // {
-            //     Log.Logger.Debug(item.ToString());
-            // }
-
             siteTitle = ParseOutWebpageTitle(rawPageText);
 
             // checks parsedText against list of keywords
@@ -134,12 +117,6 @@ namespace ScrapeAndCrawl
 
             // var dict = GetWordCount(desiredWords, Constants.PlaceNamesTXT);
             var dict = GetWordCount(desiredWords);
-
-            // Log.Logger.Debug("Word Frequency:");
-            // foreach (var entry in dict)
-            // {
-            //     Log.Logger.Debug(entry.Key + " : " + entry.Value);
-            // }
 
             // We only want to create and add a bson doc to the list if we
             // actually found some of the data we are looking for
@@ -226,33 +203,10 @@ namespace ScrapeAndCrawl
                 return;
             }
 
-            // Log.Logger.Debug("Parsed Text Content:");
-            // foreach (var item in parsedText)
-            // {
-            //     Log.Logger.Debug(item.ToString());
-            // }
-
             string siteTitle = ParseOutWebpageTitle(rawPageText);
 
             // Dictionary containing keywords desired, and a list of all contexts in which they were used
             Dictionary<string, Pair<int, List<string>>> contextCache = GetWordCountAndContext(parsedText, Constants.DefaultIgnoreWordsTXT);
-            // foreach(var key in contextCache.Keys)
-            // {
-            //     Log.Logger.Debug(key.ToString());
-            //     Log.Logger.Debug("IN RAW UNICODE" + Encoding.UTF8.GetBytes(key)[0].ToString());
-            // }
-            // ! Bellow commented code was to print out "contextCache"
-            // Log.Logger.Debug("Word Frequency:");
-            // foreach (var entry in contextCache)
-            // {
-            //     Log.Logger.Debug("KEYWORD - " + entry.Key + ":");
-            //     Log.Logger.Debug(entry.Value.Item1.ToString());
-            //     Log.Logger.Debug("keyword context:");
-            //     for (var i = 0; i < entry.Value.Item2.Count; i++)
-            //     {
-            //         Log.Logger.Debug(entry.Value.Item2[i]);
-            //     }
-            // }
 
             //make list from dict to sort
             var dictList = contextCache.ToList();
@@ -275,31 +229,12 @@ namespace ScrapeAndCrawl
                     continue;  // Skips the stupid empty string keyword problem we havn't fixed yet...
                 }
 
-                // word
-                // Log.Logger.Debug("KEYWORD - " + dictList[i].Key + ":");
-                // Log.Logger.Debug("IN RAW UNICODE" + Encoding.UTF8.GetBytes(dictList[i].Key)[0].ToString());
-
-                // num occurances
-                // Log.Logger.Debug(dictList[i].Value.Item1.ToString());
-        
-                // Log.Logger.Debug("keyword context:");
-                // for (var j = 0; j < dictList[i].Value.Item2.Count; j++)
-                // {
-                //     Log.Logger.Debug(dictList[i].Value.Item2[j]);
-                // }
-
                 // Excludes words we don't care about
                 var desiredWords = ExcludeWords(dictList[i].Value.Item2);
 
                 //the context sentences
                 //number of occurances of context words for a given keyword
                 var contextWordCount = GetWordCount(desiredWords);
-
-                // foreach(var kvpair in contextWordCount)
-                // {
-                //     if (kvpair.Value > 1)
-                //         Log.Logger.Debug("Key: " + kvpair.Key.ToString() + "\n" + "Val: " + kvpair.Value.ToString());
-                // }
 
                 sentimentAnalysis.Add(new BsonElement(
                     dictList[i].Key,new BsonDocument
@@ -343,8 +278,6 @@ namespace ScrapeAndCrawl
             htmlDoc.LoadHtml(rawHTML);
 
             var unwantedNodes = htmlDoc.DocumentNode.SelectNodes("//form");
-
-            // ! Log.Logger.Debug("-----TEST-----\n" + htmlDoc.ParsedText);
 
             if (unwantedNodes != null)
             {
@@ -397,8 +330,6 @@ namespace ScrapeAndCrawl
         /// </summary>
         static List<string> ParseRawHTML_bodyText(string rawPageHtml)
         {
-            // List<string> result = new List<string>();
-
             // Load html into document ----------
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(rawPageHtml);
@@ -411,15 +342,8 @@ namespace ScrapeAndCrawl
             // Replace '\n' in each line
             for (int i = 0; i < result.Count; i++)
             {
-                // result[i] = Regex.Replace(result[i], "/[\n\n]/", " ");
                 result[i].Replace("\n", " ");
             }
-
-            // Log.Logger.Debug("TESTING NEW HTML BODY PARSE");
-            // foreach (var item in result)
-            // {
-            //     Log.Logger.Debug(item);
-            // }
 
             return result;
         }
@@ -475,8 +399,6 @@ namespace ScrapeAndCrawl
             {
                 foreach(string word in parsedText[i].Split(' '))
                 {
-                    // ! Log.Logger.Debug("WORD : " + word);
-
                     // Trims out all non letter characters from the word
                     var trimmedWord = word;
                     trimmedWord = new string((
@@ -536,11 +458,6 @@ namespace ScrapeAndCrawl
             // Tracks each found word
             HashSet<string> foundWords = new HashSet<string>();
 
-            // foreach (var item in parsedText)
-            // {
-            //     Console.WriteLine($"\n{item}");
-            // }
-
             foreach(var str in parsedText)
             {
                 foreach(var word in str.Split(' '))
@@ -553,7 +470,6 @@ namespace ScrapeAndCrawl
                         where char.IsLetterOrDigit(c)
                         select c
                     ).ToArray());
-                    // trimmedWord.Replace("\uFEFF", "");  // THIS IS TRYING TO GET RID OF zero width no-break space
 
                     if (keywords == null)
                     {
@@ -638,8 +554,6 @@ namespace ScrapeAndCrawl
                 );
             }
 
-            // Dictionary<string, int> wordInstanceCount = new Dictionary<string, int>();
-
             if (toIgnore != null)
                 ignoredSet.UnionWith(additiveIgnoredSet);
 
@@ -661,8 +575,6 @@ namespace ScrapeAndCrawl
                     // if word is not contained within general set or within the additive one, might need a check if set is null but not sure
                     if (!ignoredSet.Contains(trimmedWord) && trimmedWord.Any(Char.IsLetter))
                     {
-                        // if (nodeText.Any( x => char.IsLetter(x)))  // makes sure word contains only letters
-
                         desiredWords.Add(trimmedWord);
                     }
                 }
